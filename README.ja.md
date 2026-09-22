@@ -123,7 +123,7 @@ node bin/game-qa.cjs report  examples/archer-arena/.game-qa/compare-<日時>
 
 ## ライセンス
 
-Apache-2.0。[LICENSE](LICENSE) を参照してください。
+MIT。[LICENSE](LICENSE) を参照してください。
 
 ## 現状
 
