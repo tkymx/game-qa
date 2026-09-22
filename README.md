@@ -133,6 +133,7 @@ HTML report.
 
 How this was built and what the comparison showed:
 
+- [Releasing game-qa as open source](https://taku-game.com/entry/2026/09/22/231043)
 - [Building automated game QA with Jev](https://taku-game.com/entry/2026/09/22/204608)
 - [Running the same QA on a Mac only with Laya-MLX](https://taku-game.com/entry/2026/09/22/204614)
 - [Jev vs Laya on a real-time action game](https://taku-game.com/entry/2026/09/22/204622)

@@ -117,6 +117,7 @@ node bin/game-qa.cjs report  examples/archer-arena/.game-qa/compare-<日時>
 
 作った経緯と、比べて分かったことを書いています。
 
+- [JevとLayaにWebゲームを遊ばせるgame-qaをOSSで公開しました](https://taku-game.com/entry/2026/09/22/231043)
 - [Jevで自作ゲームを自動QA、AIがプレイして動作確認](https://taku-game.com/entry/2026/09/22/204608)
 - [Laya-MLXでゲームの自動QAをMacだけで動かしてみた](https://taku-game.com/entry/2026/09/22/204614)
 - [リアルタイムアクションならLayaが圧勝、Jevと自動QA比較](https://taku-game.com/entry/2026/09/22/204622)
