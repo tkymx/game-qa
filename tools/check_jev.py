@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Connectivity check for Jev (TypeSafe AI System One).
 
-Reads TYPESAFE_API_KEY from the .env at the game-qa root (or the path in GAME_QA_ENV), sends one
+Reads TYPESAFE_API_KEY the same way game-qa does (environment > GAME_QA_ENV or ~/.config/game-qa/.env
+> .env at the game-qa root), sends one
 POST /v1/systemone and prints the raw response. Standard library only.
 
   python3 tools/check_jev.py
@@ -15,7 +16,8 @@ import urllib.error
 import urllib.request
 
 API_URL = "https://api.typesafe.ai/v1/systemone"
-ENV_PATH = os.environ.get("GAME_QA_ENV", os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env"))
+USER_ENV = os.environ.get("GAME_QA_ENV", os.path.expanduser("~/.config/game-qa/.env"))
+ROOT_ENV = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env")
 
 
 def load_env(path: str) -> dict:
@@ -33,11 +35,12 @@ def load_env(path: str) -> dict:
 
 
 def main() -> int:
-    env = load_env(ENV_PATH)
-    api_key = env.get("TYPESAFE_API_KEY") or os.environ.get("TYPESAFE_API_KEY")
+    api_key = (os.environ.get("TYPESAFE_API_KEY")
+               or load_env(USER_ENV).get("TYPESAFE_API_KEY")
+               or load_env(ROOT_ENV).get("TYPESAFE_API_KEY"))
 
     if not api_key or api_key == "your-api-key":
-        print(f"TYPESAFE_API_KEY is not set. Put it in {ENV_PATH}.")
+        print(f"TYPESAFE_API_KEY is not set. Put it in {USER_ENV}.")
         print("Get a key at https://console.typesafe.ai/")
         return 1
 
@@ -91,7 +94,7 @@ def main() -> int:
         print(f"status={e.code}  elapsed={elapsed:.0f}ms")
         print(detail)
         if e.code == 401:
-            print("-> The API key is invalid. Check TYPESAFE_API_KEY in .env.")
+            print("-> The API key is invalid. Check TYPESAFE_API_KEY in ~/.config/game-qa/.env.")
         elif e.code == 422:
             print("-> Request validation error. Check the payload shape.")
         elif e.code in (429, 529):

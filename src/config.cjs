@@ -4,7 +4,13 @@
 const fs = require('fs');
 const path = require('path');
 
-// The .env with TYPESAFE_API_KEY lives next to game-qa itself, not in each game project.
+const os = require('os');
+
+// TYPESAFE_API_KEY belongs to the person running game-qa, not to each game project.
+// Lookup order (first wins): process env > GAME_QA_ENV or ~/.config/game-qa/.env > .env at the game-qa root.
+// The file in the home directory is shared by every clone and worktree, and it is also what the
+// monitor app sees (apps started from Finder do not get variables exported in the shell profile).
+const USER_ENV = process.env.GAME_QA_ENV || path.join(os.homedir(), '.config', 'game-qa', '.env');
 const ROOT_ENV = path.resolve(__dirname, '..', '.env');
 
 function readJson(p) {
@@ -46,7 +52,7 @@ function loadConfig(configPath) {
     dangerList: rel(raw.dangerList),
     provider: raw.provider || 'jev',
     runtimeDir: rel(raw.runtimeDir || '.game-qa'),
-    env: { ...loadEnvFile(ROOT_ENV), ...process.env },
+    env: { ...loadEnvFile(ROOT_ENV), ...loadEnvFile(USER_ENV), ...process.env },
   };
 }
 
@@ -65,4 +71,5 @@ function loadScenario(config, idOrPath) {
   return { id: s.id || path.basename(p, '.json'), ...s };
 }
 
-module.exports = { loadConfig, loadScenario, listScenarios };
+module.exports = {
+  USER_ENV, loadConfig, loadScenario, listScenarios };

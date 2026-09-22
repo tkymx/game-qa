@@ -87,7 +87,8 @@ danger-list.json    { "patterns": ["delete", "reset", "purchase", "buy"] }
 or `{ "url": "..." }`. Use `setup` steps to reach the screen the scenario starts on, and set
 `intervalMs` to ~500 for menu scenarios so screens have time to change.
 
-The Jev API key is **not** part of the project: it lives in `.env` at the game-qa root.
+The Jev API key is **not** part of the project: it lives in `~/.config/game-qa/.env` (or an exported
+`TYPESAFE_API_KEY`). Never write it into the game's repository.
 
 ## 4. Verify with a real run
 

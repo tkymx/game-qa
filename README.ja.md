@@ -25,10 +25,12 @@ game-qa がやるのは、ゲームを起動して、ゲームに今の状況を
 npm install
 npx playwright install chromium
 
-cp .env.example .env            # Jev を使う場合: TYPESAFE_API_KEY を書く（game-qa 直下。どのゲームでも共通）
+mkdir -p ~/.config/game-qa && cp .env.example ~/.config/game-qa/.env   # Jev を使う場合: TYPESAFE_API_KEY を書く
 bash laya/setup.sh              # Laya を使う場合: Apple Silicon と uv が必要
 bash monitor-app/build_app.sh   # Mac の監視アプリ → monitor-app/JevQAMonitor.app
 ```
+
+キーは、`TYPESAFE_API_KEY` の環境変数 → `~/.config/game-qa/.env`（`GAME_QA_ENV` で場所を変えられる）→ game-qa 直下の `.env` の順に探します。ホームに置いておけば、どこにクローンしても監視アプリからでも同じキーが使え、ゲームのリポジトリに入ることもありません。
 
 ### 2. サンプルを動かす
 

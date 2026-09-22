@@ -30,10 +30,14 @@ than Jev's 2–3 (average damage over 60 s: 8 vs 23, same seeds).
 npm install
 npx playwright install chromium
 
-cp .env.example .env            # Jev: put TYPESAFE_API_KEY here (game-qa root, shared by all games)
+mkdir -p ~/.config/game-qa && cp .env.example ~/.config/game-qa/.env   # Jev: put TYPESAFE_API_KEY here
 bash laya/setup.sh              # Laya: Apple Silicon + uv
 bash monitor-app/build_app.sh   # macOS monitor app → monitor-app/JevQAMonitor.app
 ```
+
+The key is looked up in this order: an exported `TYPESAFE_API_KEY`, `~/.config/game-qa/.env`
+(or the file in `GAME_QA_ENV`), then `.env` at the game-qa root. The home-directory file works from
+any clone and from the monitor app, and never ends up in a game's repository.
 
 ### 2. Run the example
 

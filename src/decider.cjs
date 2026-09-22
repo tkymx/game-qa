@@ -51,7 +51,7 @@ async function createDecider({ provider, model, env, runtimeDir }) {
   if (provider === 'jev') {
     const apiKey = env.TYPESAFE_API_KEY;
     if (!apiKey || apiKey === 'your-api-key') {
-      throw new Error('TYPESAFE_API_KEY is not set (put it in .env next to qa.config.json, or export it).');
+      throw new Error('TYPESAFE_API_KEY is not set (put it in ~/.config/game-qa/.env, or export it).');
     }
     const d = {
       provider,
