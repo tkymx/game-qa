@@ -87,6 +87,10 @@ an HTML report.
 `monitor-app/` is a small SwiftUI app that starts runs, pauses/stops them, and shows each decision
 live. Build it with `bash monitor-app/build_app.sh`.
 
+## License
+
+Apache-2.0. See [LICENSE](LICENSE).
+
 ## Status
 
 Early and opinionated: the move mode assumes a top-down game with a virtual joystick. Contributions
