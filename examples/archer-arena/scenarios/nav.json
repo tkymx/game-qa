@@ -1,0 +1,10 @@
+{
+  "title": "Archer Arena - ナビゲーションQA",
+  "description": "Title画面のボタン操作を確認する（「はじめる」でBattleへ遷移すると __qaState() が null を返すので no_candidates で終わる）",
+  "mode": "nav",
+  "steps": 5,
+  "setup": [
+    { "waitFor": "window.__sceneReady && window.__sceneReady('Title')" },
+    { "wait": 500 }
+  ]
+}

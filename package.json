@@ -1,0 +1,9 @@
+{
+  "name": "game-qa",
+  "version": "0.1.0",
+  "description": "Let a fast decision model (Jev / Laya) play your web game and check it: exploratory menu QA and real-time movement QA with a virtual joystick.",
+  "bin": { "game-qa": "bin/game-qa.cjs" },
+  "files": ["bin", "src", "laya/laya_server.py", "laya/setup.sh", "report", "docs"],
+  "engines": { "node": ">=20" },
+  "dependencies": { "playwright": "^1.50.0" }
+}

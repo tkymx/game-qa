@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>Archer Arena — QAサンプルゲーム</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  background: #1a1a2e;
+  touch-action: none;
+  -webkit-user-select: none; user-select: none;
+}
+canvas { display: block; margin: 0 auto; }
+#hint {
+  position: fixed; left: 0; right: 0; bottom: 8px; text-align: center;
+  color: #888; font: 12px sans-serif; pointer-events: none;
+}
+</style>
+</head>
+<body>
+<div id="hint">矢印キー / WASD で移動。攻撃は自動。</div>
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>

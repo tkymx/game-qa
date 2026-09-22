@@ -1,0 +1,16 @@
+{
+  "title": "Archer Arena - 中央生存QA",
+  "description": "撃破数は狙わず、マップ中央から半径80px付近に留まりながら60秒生き残れるかを検証する",
+  "mode": "move",
+  "maxSeconds": 75,
+  "surviveSeconds": 60,
+  "preferCenter": true,
+  "centerRadius": 80,
+  "reportVideoSpeed": 2,
+  "setup": [
+    { "waitFor": "window.__sceneReady && window.__sceneReady('Title')" },
+    { "eval": "window.__startScene('Battle')" },
+    { "waitFor": "window.__sceneReady('Battle')", "timeoutMs": 5000 },
+    { "eval": "window.__qaDisableWin()" }
+  ]
+}

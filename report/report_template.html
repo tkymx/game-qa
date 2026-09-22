@@ -1,0 +1,352 @@
+<title>Jev vs Laya 対戦記録</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+JP:wght@400;500;700&display=swap">
+<style>
+:root {
+  --ground: #f2f3f7;
+  --surface: #ffffff;
+  --ink: #171a27;
+  --muted: #5a6078;
+  --faint: #8a90a6;
+  --rule: #dadde7;
+  --jev: #b8681a;
+  --jev-soft: #f6e6d4;
+  --laya: #16806f;
+  --laya-soft: #d5eeea;
+  --good: #1d7a45;
+  --bad: #b2332f;
+  --stage: #151826;
+  --sans: "IBM Plex Sans JP", "Hiragino Sans", "Hiragino Kaku Gothic ProN", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #11131d;
+    --surface: #1a1d2b;
+    --ink: #e6e8f1;
+    --muted: #a0a6bc;
+    --faint: #767c94;
+    --rule: #2a2e41;
+    --jev: #e39c4c;
+    --jev-soft: #3a2a19;
+    --laya: #46c0ad;
+    --laya-soft: #16332f;
+    --good: #5cc98a;
+    --bad: #ef7a74;
+    --stage: #0b0d15;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #11131d;
+  --surface: #1a1d2b;
+  --ink: #e6e8f1;
+  --muted: #a0a6bc;
+  --faint: #767c94;
+  --rule: #2a2e41;
+  --jev: #e39c4c;
+  --jev-soft: #3a2a19;
+  --laya: #46c0ad;
+  --laya-soft: #16332f;
+  --good: #5cc98a;
+  --bad: #ef7a74;
+  --stage: #0b0d15;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--ground);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.7;
+  padding-inline: 16px;
+  padding-block: 40px 64px;
+}
+.wrap { max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 48px; }
+h1, h2, h3 { text-wrap: balance; margin: 0; line-height: 1.3; }
+h1 { font-size: clamp(28px, 4.2vw, 40px); font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 21px; font-weight: 700; }
+h3 { font-size: 15px; font-weight: 700; }
+p { margin: 0; }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.eyebrow { font-size: 12px; letter-spacing: 0.08em; color: var(--muted); font-weight: 500; }
+
+header { display: flex; flex-direction: column; gap: 14px; }
+.meta { color: var(--muted); font-size: 13.5px; max-width: 70ch; }
+.legend { display: flex; flex-wrap: wrap; gap: 10px; }
+.chip { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px 5px 10px; border-radius: 999px; font-size: 13px; font-weight: 500; }
+.chip i { width: 10px; height: 10px; border-radius: 50%; display: block; }
+.chip.jev { background: var(--jev-soft); color: var(--ink); }
+.chip.jev i { background: var(--jev); }
+.chip.laya { background: var(--laya-soft); color: var(--ink); }
+.chip.laya i { background: var(--laya); }
+
+.verdict { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 22px 24px; display: flex; flex-direction: column; gap: 10px; }
+.verdict p { max-width: 72ch; }
+.verdict ul { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 4px; max-width: 72ch; }
+
+section { display: flex; flex-direction: column; gap: 18px; }
+.section-head { display: flex; flex-direction: column; gap: 6px; }
+.section-head p { color: var(--muted); font-size: 14px; max-width: 72ch; }
+
+.seedbar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.seedbar span { font-size: 13px; color: var(--muted); margin-right: 4px; }
+.seedbar button {
+  font: 500 13px var(--mono); padding: 5px 12px; border-radius: 6px; cursor: pointer;
+  border: 1px solid var(--rule); background: var(--surface); color: var(--ink);
+}
+.seedbar button[aria-pressed="true"] { background: var(--ink); color: var(--ground); border-color: var(--ink); }
+.seedbar button:focus-visible { outline: 2px solid var(--laya); outline-offset: 2px; }
+.videos { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+figure { margin: 0; display: flex; flex-direction: column; gap: 8px; }
+figure video { width: 100%; max-width: 100%; aspect-ratio: 720 / 690; background: var(--stage); border-radius: 8px; display: block; }
+figcaption { font-size: 13px; color: var(--muted); }
+figcaption b { color: var(--ink); font-weight: 700; }
+
+.scenario { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 24px; display: flex; flex-direction: column; gap: 22px; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 28px; align-items: start; }
+
+.metrics { width: 100%; border-collapse: collapse; font-size: 14px; }
+.metrics th, .metrics td { padding: 9px 8px; border-bottom: 1px solid var(--rule); text-align: right; }
+.metrics th:first-child, .metrics td:first-child { text-align: left; }
+.metrics thead th { font-size: 12px; font-weight: 500; color: var(--muted); letter-spacing: 0.04em; }
+.metrics thead th.jev { color: var(--jev); }
+.metrics thead th.laya { color: var(--laya); }
+.metrics td.label { color: var(--ink); }
+.metrics td.label small { display: block; color: var(--faint); font-size: 11.5px; line-height: 1.4; }
+.metrics td.win { font-weight: 700; }
+.metrics td.jev-col.win { background: var(--jev-soft); }
+.metrics td.laya-col.win { background: var(--laya-soft); }
+.metrics-note { font-size: 12px; color: var(--faint); margin-top: 6px; }
+
+.chart { display: flex; flex-direction: column; gap: 8px; }
+.chart svg { width: 100%; height: auto; display: block; overflow: visible; }
+.chart .note { font-size: 12px; color: var(--faint); }
+
+.runs { overflow-x: auto; }
+details summary { cursor: pointer; font-size: 14px; color: var(--muted); }
+details summary:focus-visible { outline: 2px solid var(--laya); outline-offset: 2px; }
+.runtable { border-collapse: collapse; font-size: 13px; margin-top: 12px; min-width: 760px; width: 100%; }
+.runtable th, .runtable td { padding: 7px 8px; border-bottom: 1px solid var(--rule); text-align: right; white-space: nowrap; }
+.runtable th:nth-child(-n+3), .runtable td:nth-child(-n+3) { text-align: left; }
+.runtable th { font-weight: 500; color: var(--muted); font-size: 12px; }
+.tag { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 500; }
+.tag.ok { background: color-mix(in srgb, var(--good) 16%, transparent); color: var(--good); }
+.tag.ng { background: color-mix(in srgb, var(--bad) 16%, transparent); color: var(--bad); }
+.dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+
+.method { color: var(--muted); font-size: 13.5px; display: flex; flex-direction: column; gap: 8px; }
+.method ul { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 4px; max-width: 80ch; }
+
+@media (max-width: 480px) {
+  body { padding-block: 24px 48px; }
+  .scenario { padding: 18px 16px; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">game-qa · 判定エンジン比較</div>
+    <h1>Jev vs Laya 対戦記録</h1>
+    <p class="meta" id="meta"></p>
+    <div class="legend">
+      <span class="chip jev"><i></i>Jev — TypeSafe AI のクラウド API</span>
+      <span class="chip laya"><i></i>Laya — Apple Silicon 上のローカル MLX</span>
+    </div>
+  </header>
+
+  <div class="verdict">
+    <h2>結論</h2>
+    <!--__VERDICT__-->
+  </div>
+
+  <section>
+    <div class="section-head">
+      <h2>同じ敵の出方で並べたプレイ</h2>
+      <p>左が Jev、右が Laya。シードごとに敵の出現位置・種類が同じなので、動きの差がそのまま判断の差になる。</p>
+    </div>
+    <div class="seedbar" id="seedbar"><span>シード</span></div>
+    <div class="videos" id="videos"></div>
+  </section>
+
+  <div id="scenarios" style="display:flex;flex-direction:column;gap:28px"></div>
+
+  <section class="method">
+    <h2 style="color:var(--ink)">測り方</h2>
+    <ul>
+      <li>同じシード（1〜5）で <code>Math.random</code> を固定し、敵の出現位置・種類・発射タイミングを両エンジンで揃えた。各シードで Jev → Laya の順に実行。</li>
+      <li>アプリと同じく実ブラウザを表示した状態（headed）で実行。操作は仮想ジョイスティックのドラッグのみで、攻撃はゲーム側の自動攻撃。</li>
+      <li>当たる向きはAIの選択肢から外し、近い敵からの離脱と中央への引き戻しはコード側のガードが担う。「ガード介入率」が高いほどエンジン差は薄まる。</li>
+      <li>判定時間はランナーから見た往復時間。Jev は判断のたびに180ms待つ設定、Laya は待ちなしで連続判断。</li>
+      <li>回数が少ないと、差が小さい指標は偶然の範囲と見たほうがいい。</li>
+    </ul>
+  </section>
+</div>
+
+<script>
+const DATA = /*__DATA__*/null;
+const ENGINES = [
+  { id: 'jev', name: 'Jev', color: 'var(--jev)' },
+  { id: 'laya', name: 'Laya', color: 'var(--laya)' },
+];
+const META = DATA.scenarioMeta || {};
+const SCENARIOS = Object.fromEntries((DATA.scenarios || Object.keys(META)).map(id => [id, {
+  title: (META[id] && META[id].title) || id,
+  goal: (META[id] && META[id].description) || '',
+  speed: (META[id] && META[id].videoSpeed) || 1,
+  center: !!(META[id] && META[id].preferCenter),
+  video: `v-${id}`,
+}]));
+const RESULT_LABEL = { win: '勝利', survived: '生存', lose: '敗北', timeout: '時間切れ', jev_error: 'APIエラー', laya_error: 'エラー' };
+
+const mean = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
+const fmt = (v, d = 0) => v == null || Number.isNaN(v) ? '—' : v.toFixed(d);
+
+const byScenario = {};
+for (const r of DATA.results) (byScenario[r.scenario] ||= []).push(r);
+const seeds = [...new Set(DATA.results.map(r => r.seed))].sort((a, b) => a - b);
+const created = new Date(DATA.createdAt);
+
+document.getElementById('meta').textContent =
+  `${DATA.config || ''} を ${Object.keys(byScenario).length} シナリオ × ${seeds.length} シード、` +
+  `エンジンごとに計 ${DATA.results.length / 2} 回ずつ実行。${created.getFullYear()}-${String(created.getMonth() + 1).padStart(2, '0')}-${String(created.getDate()).padStart(2, '0')}。`;
+
+const videosHost = document.getElementById('videos');
+for (const [id, sc] of Object.entries(SCENARIOS)) {
+  const fig = document.createElement('figure');
+  fig.innerHTML = `<video id="${sc.video}" controls muted playsinline preload="metadata"></video>` +
+    `<figcaption><b>${sc.title}</b>${sc.goal ? ' — ' + sc.goal : ''}${sc.speed !== 1 ? `（${sc.speed}倍速）` : ''}</figcaption>`;
+  videosHost.appendChild(fig);
+}
+
+// 動画のシード切り替え
+const bar = document.getElementById('seedbar');
+function showSeed(seed) {
+  for (const [id, sc] of Object.entries(SCENARIOS)) {
+    const v = document.getElementById(sc.video);
+    v.src = `side/${id}-seed${seed}.mp4`;
+  }
+  for (const b of bar.querySelectorAll('button')) b.setAttribute('aria-pressed', String(Number(b.dataset.seed) === seed));
+}
+for (const s of seeds) {
+  const b = document.createElement('button');
+  b.type = 'button'; b.id = `seed-${s}`; b.dataset.seed = s; b.textContent = s;
+  b.addEventListener('click', () => showSeed(s));
+  bar.appendChild(b);
+}
+showSeed(seeds[0]);
+
+function metricRows(id, runs) {
+  const rows = [];
+  const pick = e => runs.filter(r => r.provider === e);
+  const agg = (e, f) => { const v = pick(e).map(f).filter(x => x != null); return mean(v); };
+  const succ = e => pick(e).filter(r => r.success).length;
+  rows.push({ label: '成功', val: e => `${succ(e)} / ${pick(e).length}`, cmp: e => succ(e), better: 'high' });
+  rows.push({ label: '被ダメージ（平均）', sub: 'HP100のうち失った量', val: e => fmt(agg(e, r => r.damage)), cmp: e => agg(e, r => r.damage), better: 'low' });
+  rows.push({ label: '被弾回数（平均）', val: e => fmt(agg(e, r => r.hits), 1), cmp: e => agg(e, r => r.hits), better: 'low' });
+  if (!SCENARIOS[id].center) {
+    rows.push({ label: '倒し切るまでの時間', sub: '成功した回の平均', val: e => fmt(mean(pick(e).filter(r => r.success).map(r => r.elapsedSec)), 1) + '秒', cmp: e => mean(pick(e).filter(r => r.success).map(r => r.elapsedSec)), better: 'low' });
+  } else {
+    rows.push({ label: '中央からの距離（平均）', val: e => fmt(agg(e, r => r.centerAvg)) + 'px', cmp: e => agg(e, r => r.centerAvg), better: 'low' });
+    rows.push({ label: '中央からの距離（最大）', sub: '各回の最大の平均', val: e => fmt(agg(e, r => r.centerMax)) + 'px', cmp: e => agg(e, r => r.centerMax), better: 'low' });
+  }
+  rows.push({ label: '判定時間（中央値）', val: e => fmt(agg(e, r => r.latencyP50)) + 'ms', cmp: e => agg(e, r => r.latencyP50), better: 'low' });
+  rows.push({ label: '判定回数', val: e => fmt(agg(e, r => r.decisionsPerSec), 1) + '回/秒', cmp: e => agg(e, r => r.decisionsPerSec), better: 'high' });
+  rows.push({ label: 'ガード介入率', sub: 'AIの判断をコードが上書きした割合', val: e => fmt(agg(e, r => r.guardShare) * 100) + '%', cmp: () => null });
+  return rows;
+}
+
+function metricsTable(id, runs) {
+  const t = document.createElement('table');
+  t.className = 'metrics';
+  t.innerHTML = `<thead><tr><th>指標</th><th class="jev">Jev</th><th class="laya">Laya</th></tr></thead>`;
+  const tb = document.createElement('tbody');
+  for (const row of metricRows(id, runs)) {
+    const a = row.cmp('jev'), b = row.cmp('laya');
+    let win = null;
+    if (a != null && b != null && a !== b) win = (row.better === 'low') === (a < b) ? 'jev' : 'laya';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td class="label">${row.label}${row.sub ? `<small>${row.sub}</small>` : ''}</td>` +
+      ENGINES.map(e => `<td class="num ${e.id}-col ${win === e.id ? 'win' : ''}">${row.val(e.id)}</td>`).join('');
+    tb.appendChild(tr);
+  }
+  t.appendChild(tb);
+  return t;
+}
+
+// シードごとの被ダメージを Jev/Laya 並べた棒グラフ
+function damageChart(runs) {
+  const W = 460, H = 230, L = 40, R = 10, T = 14, B = 34;
+  const iw = W - L - R, ih = H - T - B;
+  const max = 100;
+  const y = v => T + ih - (v / max) * ih;
+  const group = iw / seeds.length, bw = Math.min(22, group / 3.2);
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="シードごとの被ダメージ">`;
+  for (const g of [0, 25, 50, 75, 100]) {
+    s += `<line x1="${L}" x2="${W - R}" y1="${y(g)}" y2="${y(g)}" stroke="var(--rule)" stroke-width="1"/>`;
+    s += `<text x="${L - 8}" y="${y(g) + 4}" text-anchor="end" font-size="11" fill="var(--faint)" font-family="IBM Plex Mono, monospace">${g}</text>`;
+  }
+  seeds.forEach((seed, i) => {
+    const cx = L + group * i + group / 2;
+    ENGINES.forEach((e, k) => {
+      const r = runs.find(x => x.seed === seed && x.provider === e.id);
+      if (!r) return;
+      const v = r.damage ?? 0;
+      const x = cx + (k === 0 ? -bw - 2 : 2);
+      s += `<rect x="${x}" y="${y(v)}" width="${bw}" height="${Math.max(0, y(0) - y(v))}" rx="2" fill="${e.color}"><title>${e.name} seed${seed}: 被ダメージ${v}</title></rect>`;
+      if (!r.success) s += `<text x="${x + bw / 2}" y="${y(v) - 5}" text-anchor="middle" font-size="10" fill="var(--bad)">×</text>`;
+      else if (v === 0) s += `<rect x="${x}" y="${y(0) - 2}" width="${bw}" height="2" fill="${e.color}"/>`;
+    });
+    s += `<text x="${cx}" y="${H - 12}" text-anchor="middle" font-size="11" fill="var(--muted)" font-family="IBM Plex Mono, monospace">seed ${seed}</text>`;
+  });
+  s += `<line x1="${L}" x2="${W - R}" y1="${y(0)}" y2="${y(0)}" stroke="var(--faint)" stroke-width="1"/>`;
+  return s + '</svg>';
+}
+
+function runTable(runs) {
+  const rows = [...runs].sort((a, b) => a.seed - b.seed || a.provider.localeCompare(b.provider));
+  const eng = id => ENGINES.find(e => e.id === id);
+  return `<div class="runs"><table class="runtable"><thead><tr>
+    <th>シード</th><th>エンジン</th><th>結果</th><th>残りHP</th><th>被弾</th><th>撃破</th><th>時間</th>
+    <th>判定 中央値</th><th>判定 95%</th><th>判定回数</th><th>中央距離</th><th>ゲームfps</th></tr></thead><tbody>` +
+    rows.map(r => `<tr>
+      <td class="num">${r.seed}</td>
+      <td><span class="dot" style="background:${eng(r.provider).color}"></span>${eng(r.provider).name}</td>
+      <td><span class="tag ${r.success ? 'ok' : 'ng'}">${RESULT_LABEL[r.result] || r.result}</span></td>
+      <td class="num">${r.finalHp ?? '—'}</td>
+      <td class="num">${r.hits}</td>
+      <td class="num">${r.defeated ?? '—'}</td>
+      <td class="num">${r.elapsedSec}秒</td>
+      <td class="num">${fmt(r.latencyP50)}ms</td>
+      <td class="num">${fmt(r.latencyP95)}ms</td>
+      <td class="num">${fmt(r.decisionsPerSec, 1)}/秒</td>
+      <td class="num">${fmt(r.centerAvg)}px</td>
+      <td class="num">${r.fpsP50 ?? '—'}</td>
+    </tr>`).join('') + '</tbody></table></div>';
+}
+
+const host = document.getElementById('scenarios');
+for (const [id, sc] of Object.entries(SCENARIOS)) {
+  const runs = byScenario[id];
+  if (!runs) continue;
+  const el = document.createElement('section');
+  el.className = 'scenario';
+  el.innerHTML = `<div class="section-head"><h2>${sc.title}</h2><p>${sc.goal}</p></div>`;
+  const grid = document.createElement('div');
+  grid.className = 'grid2';
+  const tableWrap = document.createElement('div');
+  tableWrap.appendChild(metricsTable(id, runs));
+  tableWrap.insertAdjacentHTML('beforeend', '<p class="metrics-note">色付きのセルがその指標で良かった側。</p>');
+  grid.appendChild(tableWrap);
+  const chart = document.createElement('div');
+  chart.className = 'chart';
+  chart.innerHTML = `<h3>シードごとの被ダメージ</h3>${damageChart(runs)}<p class="note">左の棒が Jev、右の棒が Laya。× は失敗した回。</p>`;
+  grid.appendChild(chart);
+  el.appendChild(grid);
+  const det = document.createElement('details');
+  det.innerHTML = `<summary>全${runs.length}回の記録</summary>${runTable(runs)}`;
+  el.appendChild(det);
+  host.appendChild(el);
+}
+</script>

@@ -1,0 +1,17 @@
+{
+  "nav": {
+    "instructions": "ゲームの探索的QA中。目的は画面を巡って未知の画面に到達し、クラッシュや異常がないか確認すること。[ui]の選択肢を優先して新しい画面に進む行動を選ぶ。visited_scenes_so_far に無い画面へ進めそうな候補があれば最優先。[decorative]は同じ画面に留まる行動なので、[ui]の候補が無い時だけ選ぶ。recent_history と同じ行動の繰り返しは避けて。",
+    "stableQuestion": "この画面はエラー表示・真っ白・レイアウト崩れなど異常な状態に見えるか?"
+  },
+  "move": {
+    "instructions": "被弾を避ける移動方向を選ぶ。選択肢は、動き続けても当たらない方向だけに絞ってある(当たる方向は「危険な方向」)。脅威は近い順で「種類+方向+距離」、弾はこちらへ向かってくるものだけ。弾は自分と同じ速さなので真後ろに逃げても当たる。弾の方向と直角へ横に避ける(例: 弾がNEなら NW か SE)。予兆付き射撃も同じく射線と直角へ。突進は遅いので離れればよい。壁際を避ける。脅威なしならSTAY。",
+    "surviveSuffix": " {seconds}秒生き残るのが目的。",
+    "centerSuffix": " 脅威が無ければ「中央」の方向へ寄る。",
+    "directionLabels": { "N": "北", "NE": "北東", "E": "東", "SE": "南東", "S": "南", "SW": "南西", "W": "西", "NW": "北西", "STAY": "留まる" },
+    "entityLabels": { "walker": "突進", "shooter": "射撃" },
+    "telegraphLabels": { "charging": "予兆" },
+    "projectileLabel": "弾",
+    "noneLabel": "なし",
+    "stateKeys": { "threats": "脅威", "center": "中央", "unsafe": "危険な方向" }
+  }
+}

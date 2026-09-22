@@ -1,0 +1,8 @@
+# per-project runtime output (status, feed, logs, compare runs)
+.game-qa/
+.env
+node_modules/
+laya/.venv/
+__pycache__/
+monitor-app/.build/
+monitor-app/*.app
