@@ -1,5 +1,7 @@
 # game-qa
 
+English | [日本語](README.ja.md)
+
 Let a fast decision model play your web game and check it.
 
 game-qa reads your game's state from a small `window` hook, asks a typed decision model which
