@@ -4,6 +4,8 @@
 
 判断の速いAI（クラウドの [Jev](https://docs.typesafe.ai/introduction) と、手元の Mac で動く [Laya-MLX](https://github.com/mizorewww/laya-mlx)）に Web ゲームを遊ばせるための、Mac アプリと CLI です。シナリオを選んで実行し、AI が何を見て何を選んだかをログで追えます。
 
+![同じステージ・同じシードで、上の Jev（1秒に約2回）は穴に落ち、下の Laya（1秒に約20回）は進み続ける](docs/media/side-runner-jev-vs-laya.gif)
+
 game-qa がやるのは、ゲームを起動して、ゲームに今の状況を聞き、AI に選ばせて、その答えをゲームに返すことだけです。ゲームの操作方法やルールは知りません。何を選択肢にするか、選ばれたものをどう実行するかは、ゲーム側が決めます。
 
 | 判断役 | 動く場所 | 1回の判断 | 必要なもの |
@@ -12,6 +14,8 @@ game-qa がやるのは、ゲームを起動して、ゲームに今の状況を
 | Laya-MLX | 手元の Mac（Apple Silicon の GPU） | 約20ミリ秒 | 初回のモデルダウンロード以降は不要 |
 
 サンプルのアクションゲームでは、1秒に20回以上判断できる Laya のほうが、1秒に2〜3回の Jev よりかなり生き残れました（同じ敵の出方で、60秒間の平均被ダメージは 8 対 23）。
+
+![archer-arena：同じ弾を、左の Jev と右の Laya が避けている](docs/media/archer-arena-jev-vs-laya.gif)
 
 ## はじめかた
 
@@ -109,10 +113,18 @@ node bin/game-qa.cjs report  examples/archer-arena/.game-qa/compare-<日時>
 
 `compare` は各シナリオを判断役ごとに同じシードで回して録画します（ページを読み込む前に `Math.random` を固定するので、敵の出方が揃います）。`report` は横並びの比較動画（`ffmpeg` が必要）と HTML のレポートを作ります。
 
+## 関連記事
+
+作った経緯と、比べて分かったことを書いています。
+
+- [Jevで自作ゲームを自動QA、AIがプレイして動作確認](https://taku-game.com/entry/2026/09/22/204608)
+- [Laya-MLXでゲームの自動QAをMacだけで動かしてみた](https://taku-game.com/entry/2026/09/22/204614)
+- [リアルタイムアクションならLayaが圧勝、Jevと自動QA比較](https://taku-game.com/entry/2026/09/22/204622)
+
 ## ライセンス
 
 Apache-2.0。[LICENSE](LICENSE) を参照してください。
 
 ## 現状
 
-まだ初期段階です。監視アプリの画面表示は今のところ日本語です。
+まだ初期段階（v0.1）です。監視アプリの画面表示は今のところ日本語です。Issue や PR は歓迎です。

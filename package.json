@@ -1,7 +1,7 @@
 {
   "name": "game-qa",
   "version": "0.1.0",
-  "description": "Let a fast decision model (Jev / Laya) play your web game and check it: exploratory menu QA and real-time movement QA with a virtual joystick.",
+  "description": "Let fast decision models (Jev / Laya) play your web game from a macOS app, with readable logs and scenarios. The game exposes window.__qa (observe / act); game-qa knows nothing about its input.",
   "bin": {
     "game-qa": "bin/game-qa.cjs"
   },

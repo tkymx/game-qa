@@ -6,6 +6,8 @@ A macOS app and CLI for letting fast decision models — [Jev](https://docs.type
 (cloud) and [Laya-MLX](https://github.com/mizorewww/laya-mlx) (on your Mac) — play your web game,
 with scenarios you can pick and logs you can actually read.
 
+![Same seed, same stage: Jev (top, ~2 decisions/s) falls into a pit, Laya (bottom, ~20 decisions/s) keeps going](docs/media/side-runner-jev-vs-laya.gif)
+
 game-qa starts your game, asks it what is going on, lets the model choose, and hands the choice
 back to the game. It knows nothing about your game's input or rules; the game decides what the
 choices are and how to perform them.
@@ -17,6 +19,8 @@ choices are and how to perform them.
 
 In the example action game, Laya's 20+ decisions per second kept the player alive far better
 than Jev's 2–3 (average damage over 60 s: 8 vs 23, same seeds).
+
+![archer-arena: Jev (left) and Laya (right) dodging the same bullets](docs/media/archer-arena-jev-vs-laya.gif)
 
 ## Quick start
 
@@ -125,10 +129,18 @@ node bin/game-qa.cjs report  examples/archer-arena/.game-qa/compare-<timestamp>
 the page loads) and records video. `report` builds side-by-side videos (needs `ffmpeg`) and an
 HTML report.
 
+## Articles (Japanese)
+
+How this was built and what the comparison showed:
+
+- [Building automated game QA with Jev](https://taku-game.com/entry/2026/09/22/204608)
+- [Running the same QA on a Mac only with Laya-MLX](https://taku-game.com/entry/2026/09/22/204614)
+- [Jev vs Laya on a real-time action game](https://taku-game.com/entry/2026/09/22/204622)
+
 ## License
 
 Apache-2.0. See [LICENSE](LICENSE).
 
 ## Status
 
-Early. The monitor app UI is in Japanese for now.
+Early (v0.1). The monitor app UI is in Japanese for now. Issues and PRs are welcome.
