@@ -1,7 +1,6 @@
 {
   "title": "Archer Arena - 戦闘QA",
   "description": "被弾をなるべく避けながら敵を12体倒し切れるかを、仮想ジョイスティック操作で検証する",
-  "mode": "move",
   "maxSeconds": 120,
   "setup": [
     { "waitFor": "window.__sceneReady && window.__sceneReady('Title')" },

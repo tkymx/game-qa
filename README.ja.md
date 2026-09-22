@@ -2,69 +2,94 @@
 
 [English](README.md) | 日本語
 
-判断の速いAIに、Webゲームを自動でプレイさせて確認するツールです。
+判断の速いAI（クラウドの [Jev](https://docs.typesafe.ai/introduction) と、手元の Mac で動く [Laya-MLX](https://github.com/mizorewww/laya-mlx)）に Web ゲームを遊ばせるための、Mac アプリと CLI です。シナリオを選んで実行し、AI が何を見て何を選んだかをログで追えます。
 
-ゲーム側に用意した小さな関数（`window` に生やすもの）から状態を読み取り、「どのボタンを押すか」「どちらへ動くか」を型付きの判断モデルに選ばせて、Playwright から本物のマウス操作として実行します。判断役は次の2つに対応していて、どちらも同じ呼び出し方で差し替えられます。
+game-qa がやるのは、ゲームを起動して、ゲームに今の状況を聞き、AI に選ばせて、その答えをゲームに返すことだけです。ゲームの操作方法やルールは知りません。何を選択肢にするか、選ばれたものをどう実行するかは、ゲーム側が決めます。
 
-| 判断役 | 動く場所 | 1回の判断 | 備考 |
+| 判断役 | 動く場所 | 1回の判断 | 必要なもの |
 |---|---|---|---|
-| [Jev](https://docs.typesafe.ai/introduction)（TypeSafe AI） | クラウドAPI | 約240ミリ秒 | `TYPESAFE_API_KEY` が必要 |
-| [Laya-MLX](https://github.com/mizorewww/laya-mlx) | 手元の Mac（Apple Silicon の GPU） | 約20ミリ秒 | APIキー不要。初回のモデルダウンロード以降はネット接続も不要 |
+| Jev（TypeSafe AI） | クラウドAPI | 約240ミリ秒 | `TYPESAFE_API_KEY` |
+| Laya-MLX | 手元の Mac（Apple Silicon の GPU） | 約20ミリ秒 | 初回のモデルダウンロード以降は不要 |
 
-サンプルのアクションゲームでは、1秒に20回以上判断できる Laya のほうが、1秒に2〜3回の Jev よりかなり生き残れました（同じ敵の出方・同じ回避コードで、60秒間の平均被ダメージは 8 対 23）。
-
-## モード
-
-- **nav（画面巡り）** — メニューのボタンを選んで押し、画面を渡り歩きながら、エラーで止まらないか・抜けられない画面がないかを確かめます。「削除」「購入」など危険ボタンのリストに当たるものは、AIに見せる前に選択肢から外します。
-- **move（移動）** — 仮想ジョイスティックで動くリアルタイムのゲーム向けです。少し先の時間までに弾や敵に当たる向きをAIの選択肢から外し、追ってくる敵からの離脱や、シナリオで指定したときの中央への引き戻しは小さなガードコードが受け持ちます。
+サンプルのアクションゲームでは、1秒に20回以上判断できる Laya のほうが、1秒に2〜3回の Jev よりかなり生き残れました（同じ敵の出方で、60秒間の平均被ダメージは 8 対 23）。
 
 ## はじめかた
+
+### 1. インストール
 
 ```sh
 npm install
 npx playwright install chromium
 
-# Jev を使う場合: 設定ファイルの隣に APIキーを置く
-cp examples/archer-arena/.env.example examples/archer-arena/.env   # 中身を書き換える
-
-# Laya を使う場合（Apple Silicon と uv が必要）
-bash laya/setup.sh
-
-node bin/game-qa.cjs list --config examples/archer-arena/qa.config.json
-node bin/game-qa.cjs run  --config examples/archer-arena/qa.config.json --scenario combat --provider laya --headed
+cp .env.example .env            # Jev を使う場合: TYPESAFE_API_KEY を書く（game-qa 直下。どのゲームでも共通）
+bash laya/setup.sh              # Laya を使う場合: Apple Silicon と uv が必要
+bash monitor-app/build_app.sh   # Mac の監視アプリ → monitor-app/JevQAMonitor.app
 ```
 
-## プロジェクトの構成
+### 2. サンプルを動かす
+
+```sh
+node bin/game-qa.cjs run --config examples/archer-arena/qa.config.json --scenario combat --provider laya --headed
+```
+
+監視アプリを使う場合は、プロジェクト（`qa.config.json`）、シナリオ、Jev か Laya を選んで再生を押します。画面右にブラウザが開き、左に AI の判断・確信度・ゲームの状況が1回ずつ流れます。
+
+### 3. game-qa とゲームの間の約束ごと
+
+約束ごとはこれだけです。ゲーム側で `window.__qa` を用意します。
+
+```js
+window.__qa = {
+  configure(options) {},   // シナリオの条件（制限時間、どこで止めるか など）
+  observe() {              // 繰り返し呼ばれる
+    return {
+      state:     { screen: 'Title' },                                        // AIに渡す状況
+      questions: { tap: { type: 'choice', instructions: '...', criteria: { start: 'はじめる' } } },
+      metrics:   { hp: 80 },                                                  // 記録・比較用（任意）
+      done:      null,                                                        // 終わるときは { success, reason }
+    };                                                                        // null なら「今は判断することがない」
+  },
+  act(answers) {           // answers.tap.choice === 'start'
+    // ゲーム自身の入力として実行する（イベントを送る、ジョイスティックを倒す、キーを押す など）
+  },
+};
+```
+
+game-qa は `state` と `questions` をそのまま Jev / Laya に渡し、返ってきた答えを `act` に渡します。細かい決まりとコツは [docs/protocol.md](docs/protocol.md)（英語）にまとめています。
+
+### 4. 自分のゲームを Claude Code でつなぐ
+
+このリポジトリには、連携部分と設定ファイルを書いてくれる Claude Code のスキル [`.claude/skills/game-qa-integrate`](.claude/skills/game-qa-integrate/SKILL.md) を入れてあります。
+
+```sh
+# 自分のゲームのリポジトリで使えるようにする（~/.claude/skills/ に置いてもよい）
+mkdir -p <your-game>/.claude/skills && cp -r .claude/skills/game-qa-integrate <your-game>/.claude/skills/
+```
+
+そのうえで、ゲームのリポジトリで Claude Code に「このゲームを game-qa につないで」と頼むか、`/game-qa-integrate` を実行します。ゲームを読んで `window.__qa` を足し、`qa.config.json` とシナリオを作り、実際に動かして確認するところまで進めます。
+
+## プロジェクトのファイル
 
 ゲームごとに違うものは、すべて `qa.config.json` の隣に置きます。
 
 ```
 my-game-qa/
-  qa.config.json      アプリの起動方法、状態を返す関数の名前、移動の速さなど
-  scenarios/*.json    何を確かめるか（モード、制限時間、開始前の準備）
-  prompts.json        AIに渡す指示文と呼び名（省略可）
-  danger-list.json    絶対に押させないボタンのラベル（省略可）
-  .env                TYPESAFE_API_KEY（省略可）
+  qa.config.json      ゲームの起動方法、フック名、既定の判断役
+  scenarios/*.json    何を確かめるか（制限時間・回数、開始前の準備、configure() に渡す条件）
+  danger-list.json    絶対に選ばせないラベル（ゲーム側の除外に加えた安全網）
 ```
-
-`qa.config.json` の例:
 
 ```json
 {
   "name": "archer-arena",
   "app": { "serve": "./game", "port": 8124 },
-  "hooks": { "nav": "__qaState", "move": "__combatState" },
   "scenarios": "./scenarios",
-  "prompts": "./prompts.ja.json",
   "dangerList": "./danger-list.json",
-  "provider": "jev",
-  "move": { "playerSpeed": 185, "chasers": { "walker": { "speed": 60 } } }
+  "provider": "jev"
 }
 ```
 
-`app` は、フォルダをそのまま配信する形のほかに、`{ "command": "npm run dev", "url": "http://localhost:5173/" }`（起動コマンドを実行）や `{ "url": "https://staging.example.com/" }`（起動済みのURLに接続）とも書けます。
-
-ゲーム側で用意する関数の形は [docs/state-contract.md](docs/state-contract.md)（英語）にまとめています。
+`app` は、`{ "command": "npm run dev", "url": "http://localhost:5173/" }`（起動コマンドを実行）や `{ "url": "https://staging.example.com/" }`（起動済みのURLに接続）とも書けます。実行中の状態・判断の一覧・全ログは `<プロジェクト>/.game-qa/` に書き出されます。
 
 ## 判断役の比較
 
@@ -73,11 +98,7 @@ node bin/game-qa.cjs compare --config examples/archer-arena/qa.config.json --run
 node bin/game-qa.cjs report  examples/archer-arena/.game-qa/compare-<日時>
 ```
 
-`compare` は、移動モードのシナリオを判断役ごとに同じシードで回して録画します（ページを読み込む前に `Math.random` を差し替えるので、敵の出方が揃います）。`report` は横並びの比較動画（`ffmpeg` が必要）と HTML のレポートを作ります。
-
-## 監視アプリ（macOS）
-
-`monitor-app/` は、シナリオを選んで実行・一時停止・停止しながら、AIの判断をリアルタイムに一覧できる SwiftUI 製の小さなアプリです。`bash monitor-app/build_app.sh` でビルドできます。画面の表示は今のところ日本語です。
+`compare` は各シナリオを判断役ごとに同じシードで回して録画します（ページを読み込む前に `Math.random` を固定するので、敵の出方が揃います）。`report` は横並びの比較動画（`ffmpeg` が必要）と HTML のレポートを作ります。
 
 ## ライセンス
 
@@ -85,4 +106,4 @@ Apache-2.0。[LICENSE](LICENSE) を参照してください。
 
 ## 現状
 
-まだ初期段階で、移動モードは「仮想ジョイスティックで動く見下ろし型のゲーム」を前提にしています。状態の約束ごとを広げる提案やコントリビュートは歓迎です。
+まだ初期段階です。監視アプリの画面表示は今のところ日本語です。

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Connectivity check for Jev (TypeSafe AI System One).
 
-Reads TYPESAFE_API_KEY from .env (current directory, or the path in GAME_QA_ENV), sends one
+Reads TYPESAFE_API_KEY from the .env at the game-qa root (or the path in GAME_QA_ENV), sends one
 POST /v1/systemone and prints the raw response. Standard library only.
 
   python3 tools/check_jev.py
@@ -15,7 +15,7 @@ import urllib.error
 import urllib.request
 
 API_URL = "https://api.typesafe.ai/v1/systemone"
-ENV_PATH = os.environ.get("GAME_QA_ENV", ".env")  # run from the directory that holds your .env, or set GAME_QA_ENV
+ENV_PATH = os.environ.get("GAME_QA_ENV", os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env"))
 
 
 def load_env(path: str) -> dict:

@@ -18,8 +18,8 @@ Options for run:
   --headed              show the browser window
   --seed <n>            fix Math.random so runs are reproducible
   --video <dir>         record a video into <dir>
-  --steps <n>           nav mode: max taps
-  --max-seconds <n>     move mode: time limit
+  --steps <n>           max decisions
+  --max-seconds <n>     time limit
   --winpos x,y --winsize w,h   window placement when headed
 `;
 
@@ -50,7 +50,7 @@ async function main() {
 
   const config = loadConfig(args.config);
   if (cmd === 'list') {
-    for (const s of listScenarios(config)) console.log(`${s.id.padEnd(24)} ${s.mode || 'nav'}\t${s.title || ''}`);
+    for (const s of listScenarios(config)) console.log(`${s.id.padEnd(24)} ${s.title || ''}`);
     return 0;
   }
   if (cmd === 'run') {

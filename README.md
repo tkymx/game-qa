@@ -2,76 +2,107 @@
 
 English | [日本語](README.ja.md)
 
-Let a fast decision model play your web game and check it.
+A macOS app and CLI for letting fast decision models — [Jev](https://docs.typesafe.ai/introduction)
+(cloud) and [Laya-MLX](https://github.com/mizorewww/laya-mlx) (on your Mac) — play your web game,
+with scenarios you can pick and logs you can actually read.
 
-game-qa reads your game's state from a small `window` hook, asks a typed decision model which
-button to tap or which way to move, and performs that action with real mouse input through
-Playwright. Two decision engines are supported and share the same interface:
+game-qa starts your game, asks it what is going on, lets the model choose, and hands the choice
+back to the game. It knows nothing about your game's input or rules; the game decides what the
+choices are and how to perform them.
 
-| Engine | Where it runs | One decision | Notes |
+| Engine | Where it runs | One decision | Needs |
 |---|---|---|---|
-| [Jev](https://docs.typesafe.ai/introduction) (TypeSafe AI) | cloud API | ~240 ms | needs `TYPESAFE_API_KEY` |
-| [Laya-MLX](https://github.com/mizorewww/laya-mlx) | your Mac (Apple Silicon GPU) | ~20 ms | no API key, no network after the first model download |
+| Jev (TypeSafe AI) | cloud API | ~240 ms | `TYPESAFE_API_KEY` |
+| Laya-MLX | your Mac (Apple Silicon GPU) | ~20 ms | nothing after the first model download |
 
-In the example action game, Laya's 20+ decisions per second kept the player alive far better than
-Jev's 2–3 (average damage over 60 s: 8 vs 23, same seeds, same guard code).
-
-## Modes
-
-- **nav** — exploratory QA over menus. Taps through screens looking for crashes and dead ends.
-  Labels that match a danger list ("delete", "purchase", ...) are removed before the model sees them.
-- **move** — real-time movement QA with a virtual joystick. Directions that would collide within
-  a short horizon are removed from the model's choices; a small guard handles chasers and keeps
-  the player near the center when a scenario asks for it.
+In the example action game, Laya's 20+ decisions per second kept the player alive far better
+than Jev's 2–3 (average damage over 60 s: 8 vs 23, same seeds).
 
 ## Quick start
+
+### 1. Install
 
 ```sh
 npm install
 npx playwright install chromium
 
-# Jev: put your key next to the config
-cp examples/archer-arena/.env.example examples/archer-arena/.env   # then edit
-
-# Laya (Apple Silicon, uv required)
-bash laya/setup.sh
-
-node bin/game-qa.cjs list --config examples/archer-arena/qa.config.json
-node bin/game-qa.cjs run  --config examples/archer-arena/qa.config.json --scenario combat --provider laya --headed
+cp .env.example .env            # Jev: put TYPESAFE_API_KEY here (game-qa root, shared by all games)
+bash laya/setup.sh              # Laya: Apple Silicon + uv
+bash monitor-app/build_app.sh   # macOS monitor app → monitor-app/JevQAMonitor.app
 ```
 
-## Project layout
+### 2. Run the example
+
+```sh
+node bin/game-qa.cjs run --config examples/archer-arena/qa.config.json --scenario combat --provider laya --headed
+```
+
+Or open the monitor app, pick the project (`qa.config.json`), a scenario and Jev / Laya, and press
+play. The browser opens on the right; every decision, its confidence and the game's state are
+listed on the left.
+
+### 3. The interface between game-qa and your game
+
+This is the whole contract. Your game defines `window.__qa`:
+
+```js
+window.__qa = {
+  configure(options) {},   // scenario options (time limits, where to stop, ...)
+  observe() {              // called in a loop
+    return {
+      state:     { screen: 'Title' },                                        // context for the model
+      questions: { tap: { type: 'choice', instructions: '...', criteria: { start: 'Start' } } },
+      metrics:   { hp: 80 },                                                  // optional, for logs/reports
+      done:      null,                                                        // or { success, reason } to finish
+    };                                                                        // or null: nothing to decide now
+  },
+  act(answers) {           // answers.tap.choice === 'start'
+    // perform it with your own input: dispatch events, drag a joystick, press keys ...
+  },
+};
+```
+
+game-qa passes `state` and `questions` to Jev / Laya unchanged and gives the answers to `act`.
+Details and tips: [docs/protocol.md](docs/protocol.md).
+
+### 4. Connect your own game with Claude Code
+
+This repo ships a Claude Code skill that writes the adapter and project files for you:
+[`.claude/skills/game-qa-integrate`](.claude/skills/game-qa-integrate/SKILL.md).
+
+```sh
+# make the skill available in your game's repo (or copy it to ~/.claude/skills/)
+mkdir -p <your-game>/.claude/skills && cp -r .claude/skills/game-qa-integrate <your-game>/.claude/skills/
+```
+
+Then, in your game's repo, ask Claude Code: *"connect this game to game-qa"* (or run
+`/game-qa-integrate`). It reads the game, adds `window.__qa`, creates `qa.config.json` and
+scenarios, and verifies with a real run.
+
+## Project files
 
 Everything specific to a game lives next to its `qa.config.json`:
 
 ```
 my-game-qa/
-  qa.config.json      how to start the app, hook names, movement parameters
-  scenarios/*.json    what to test (mode, time limits, setup steps)
-  prompts.json        instructions and labels shown to the model (optional)
-  danger-list.json    labels that must never be tapped (optional)
-  .env                TYPESAFE_API_KEY (optional)
+  qa.config.json      how to start the app, hook name, default engine
+  scenarios/*.json    what to test: time/step limits, setup steps, options passed to configure()
+  danger-list.json    labels that must never be chosen (a safety net on top of the game's own filtering)
 ```
-
-`qa.config.json`:
 
 ```json
 {
   "name": "archer-arena",
   "app": { "serve": "./game", "port": 8124 },
-  "hooks": { "nav": "__qaState", "move": "__combatState" },
   "scenarios": "./scenarios",
-  "prompts": "./prompts.ja.json",
   "dangerList": "./danger-list.json",
-  "provider": "jev",
-  "move": { "playerSpeed": 185, "chasers": { "walker": { "speed": 60 } } }
+  "provider": "jev"
 }
 ```
 
-`app` can also be `{ "command": "npm run dev", "url": "http://localhost:5173/" }` or just
-`{ "url": "https://staging.example.com/" }`.
-
-What your game has to expose is described in [docs/state-contract.md](docs/state-contract.md).
+`app` can also be `{ "command": "npm run dev", "url": "http://localhost:5173/" }` or
+`{ "url": "https://staging.example.com/" }`. Runs write status, a live feed and full JSONL logs to
+`<project>/.game-qa/`.
 
 ## Comparing engines
 
@@ -80,14 +111,9 @@ node bin/game-qa.cjs compare --config examples/archer-arena/qa.config.json --run
 node bin/game-qa.cjs report  examples/archer-arena/.game-qa/compare-<timestamp>
 ```
 
-`compare` runs every move scenario with the same seeds (it replaces `Math.random` before the page
-loads) for each engine and records video. `report` builds side-by-side videos (needs `ffmpeg`) and
-an HTML report.
-
-## Monitor app (macOS)
-
-`monitor-app/` is a small SwiftUI app that starts runs, pauses/stops them, and shows each decision
-live. Build it with `bash monitor-app/build_app.sh`.
+`compare` runs each scenario with the same seeds for every engine (it fixes `Math.random` before
+the page loads) and records video. `report` builds side-by-side videos (needs `ffmpeg`) and an
+HTML report.
 
 ## License
 
@@ -95,5 +121,4 @@ Apache-2.0. See [LICENSE](LICENSE).
 
 ## Status
 
-Early and opinionated: the move mode assumes a top-down game with a virtual joystick. Contributions
-that widen the state contract are welcome.
+Early. The monitor app UI is in Japanese for now.

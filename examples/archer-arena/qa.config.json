@@ -2,16 +2,7 @@
   "name": "archer-arena",
   "app": { "serve": "./game", "port": 8124 },
   "viewport": { "width": 420, "height": 740 },
-  "hooks": { "nav": "__qaState", "move": "__combatState" },
   "scenarios": "./scenarios",
-  "prompts": "./prompts.ja.json",
   "dangerList": "./danger-list.json",
-  "provider": "jev",
-  "move": {
-    "playerSpeed": 185,
-    "avoidDistance": 110,
-    "hitRadius": 30,
-    "safeHorizon": 0.9,
-    "chasers": { "walker": { "speed": 60, "hitRadius": 30 } }
-  }
+  "provider": "jev"
 }

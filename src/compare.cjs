@@ -13,10 +13,11 @@ const mean = a => (a.length ? a.reduce((x, y) => x + y, 0) / a.length : null);
 
 function metrics(logPath) {
   const lines = fs.readFileSync(logPath, 'utf8').trim().split('\n').map(l => JSON.parse(l));
-  const steps = lines.filter(l => l.step != null && l.dir);
+  // Standard metric names a game can report from observe(): hp, maxHp, centerDistance, guard, fps
+  const steps = lines.filter(l => l.step != null && l.latencyMs != null).map(l => ({ ...l, ...(l.metrics || {}) }));
   const summary = (lines.find(l => l.summary) || {}).summary || {};
   let hits = 0;
-  for (let i = 1; i < steps.length; i++) if (steps[i].hp < steps[i - 1].hp) hits++;
+  for (let i = 1; i < steps.length; i++) if (steps[i].hp != null && steps[i].hp < steps[i - 1].hp) hits++;
   const span = steps.length > 1 ? (steps[steps.length - 1].ts - steps[0].ts) / 1000 : 0;
   const maxHp = summary.maxHp ?? (steps[0] ? steps[0].maxHp : 100);
   const second = s => Math.floor((s.ts - steps[0].ts) / 1000);
@@ -32,9 +33,9 @@ function metrics(logPath) {
     decisionsPerSec: span ? steps.length / span : null,
     latencyP50: median(steps.map(s => s.latencyMs)),
     latencyP95: pct(steps.map(s => s.latencyMs), 0.95),
-    guardShare: steps.length ? steps.filter(s => s.centerOverride).length / steps.length : null,
+    guardShare: steps.length ? steps.filter(s => s.guard).length / steps.length : null,
     centerAvg: mean(steps.map(s => s.centerDistance).filter(v => v != null)),
-    centerMax: steps.length ? Math.max(...steps.map(s => s.centerDistance ?? 0)) : null,
+    centerMax: steps.some(s => s.centerDistance != null) ? Math.max(...steps.map(s => s.centerDistance ?? 0)) : null,
     fpsP50: median(steps.map(s => s.fps).filter(f => f != null)),
     hpTimeline: steps.filter((s, i) => i === 0 || second(s) !== second(steps[i - 1])).map(s => ({ t: second(s), hp: s.hp })),
     videoPath: summary.videoPath || (lines.find(l => l.video) || {}).video || null,
@@ -56,7 +57,7 @@ async function startSharedLaya(outDir) {
 }
 
 async function compare(config, { runs = 5, scenarios, providers = ['jev', 'laya'], headed = true }) {
-  const ids = scenarios && scenarios.length ? scenarios : require('./config.cjs').listScenarios(config).filter(s => s.mode !== 'nav').map(s => s.id);
+  const ids = scenarios && scenarios.length ? scenarios : require('./config.cjs').listScenarios(config).filter(s => s.compare !== false).map(s => s.id);
   const outDir = path.join(config.runtimeDir, `compare-${new Date().toISOString().replace(/[:.]/g, '-')}`);
   const videoDir = path.join(outDir, 'videos');
   fs.mkdirSync(videoDir, { recursive: true });
@@ -70,7 +71,7 @@ async function compare(config, { runs = 5, scenarios, providers = ['jev', 'laya'
     for (let seed = 1; seed <= runs; seed++) {
       for (const id of ids) {
         const scenario = loadScenario(config, id);
-        meta[id] = { title: scenario.title || id, description: scenario.description || '', videoSpeed: scenario.reportVideoSpeed || 1, preferCenter: !!scenario.preferCenter };
+        meta[id] = { title: scenario.title || id, description: scenario.description || '', videoSpeed: scenario.reportVideoSpeed || 1, preferCenter: !!(scenario.options && scenario.options.preferCenter) };
         for (const provider of providers) {
           console.log(`\n### seed=${seed} scenario=${id} provider=${provider}`);
           let summary = null;
