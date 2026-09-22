@@ -57,8 +57,21 @@ Menu screens usually become one `choice` question over the visible buttons (labe
 coordinates collected from the engine's interactive objects or the DOM). Real-time play usually
 becomes a `choice` over movement directions or actions, asked many times per second.
 
-Reference implementation: `examples/archer-arena/game/js/qa-adapter.js` in the game-qa repo
-(menu taps + a virtual joystick + collision-aware choice filtering).
+Reference implementations in the game-qa repo:
+
+- `examples/archer-arena/game/js/qa-adapter.js` — menu taps + a virtual joystick (mouse events),
+  directions that would get hit are left out
+- `examples/side-runner/game/js/qa-adapter.js` — keyboard platformer (KeyboardEvents with keyCode),
+  each action is simulated ahead with the game's physics constants and left out if it ends in a pit
+  or an enemy
+
+Two things the side-runner taught:
+
+- **Leave out choices that make no progress** unless nothing else is safe. A small model offered
+  "go back" kept choosing it thousands of times; removing it from the choices fixed it at once.
+- **Account for how slowly answers come back.** Measure the time between `observe()` calls and
+  between `observe()` and `act()`, and simulate the current input continuing for that long before
+  the chosen action starts. A cloud model answering in ~240 ms needs a much longer look-ahead.
 
 ## 3. Create the project folder
 

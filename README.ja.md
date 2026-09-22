@@ -68,6 +68,15 @@ mkdir -p <your-game>/.claude/skills && cp -r .claude/skills/game-qa-integrate <y
 
 そのうえで、ゲームのリポジトリで Claude Code に「このゲームを game-qa につないで」と頼むか、`/game-qa-integrate` を実行します。ゲームを読んで `window.__qa` を足し、`qa.config.json` とシナリオを作り、実際に動かして確認するところまで進めます。
 
+## サンプル
+
+| サンプル | 入力 | アダプタがやっていること |
+|---|---|---|
+| [`examples/archer-arena`](examples/archer-arena) | メニューのタップ + 仮想ジョイスティック（マウスイベント） | 8方向の選択肢から、当たる向きを外す |
+| [`examples/side-runner`](examples/side-runner) | キーボード（← → Space） | 走る・跳ぶの選択肢から、穴に落ちる・敵にぶつかる行動を外す。AIの返事が遅いほど先まで確認する |
+
+`side-runner` では、Laya は毎回ゴールまで着きます（約20秒、被弾なし）。1秒に2回ほどの Jev は、ステージの途中で穴に落ちるか HP が尽きることがほとんどでした。
+
 ## プロジェクトのファイル
 
 ゲームごとに違うものは、すべて `qa.config.json` の隣に置きます。

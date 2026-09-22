@@ -1,0 +1,6 @@
+{
+  "title": "Side Runner - ゴールまで進む",
+  "description": "タイトルからスタートして、穴と敵を越えて右端のゴールに着けるかを確かめる",
+  "maxSeconds": 90,
+  "setup": [{ "waitFor": "window.__sceneReady && window.__sceneReady('Title')" }, { "wait": 300 }]
+}

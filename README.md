@@ -79,6 +79,16 @@ Then, in your game's repo, ask Claude Code: *"connect this game to game-qa"* (or
 `/game-qa-integrate`). It reads the game, adds `window.__qa`, creates `qa.config.json` and
 scenarios, and verifies with a real run.
 
+## Examples
+
+| Example | Input | What the adapter does |
+|---|---|---|
+| [`examples/archer-arena`](examples/archer-arena) | menu taps + virtual joystick (mouse events) | 8-direction choices, directions that would get hit are left out |
+| [`examples/side-runner`](examples/side-runner) | keyboard (← → Space) | run / jump choices, actions that end in a pit or an enemy are left out; looks further ahead when the model answers slowly |
+
+In `side-runner`, Laya reaches the goal every run (~20 s, no damage); Jev at ~2 decisions per second
+usually falls or runs out of HP around the middle of the stage.
+
 ## Project files
 
 Everything specific to a game lives next to its `qa.config.json`:
